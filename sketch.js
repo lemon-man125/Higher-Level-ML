@@ -11,10 +11,10 @@ function setup() {
   
 
   const options = {
-    inputs: ['x', 'y'],
-    outputs: ['freq'],
+    inputs: 2,
+    outputs: 3,
     hidden: 16,
-    task: 'regression'
+    task: 'classification'
   }
   brain = new NeuralNetwork(options);
   model.add(tf.layers.conv2d({
