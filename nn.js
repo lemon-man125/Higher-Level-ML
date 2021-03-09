@@ -6,33 +6,32 @@ class NeuralNetwork {
     if (options.inputs instanceof Array && options.outputs instanceof Array) {
       this.in = options.inputs.length;
       this.hn = options.hidden;
-      this.on = 0;
       this.dataIn = options.inputs;
-      this.dataOn = options.outputs;
+      this.dataOn = options.outputs[0];
       this.task = options.task;
       this.dataAdded = 0;
-      this.metadata = {
-        [this.dataOn[0]]: {
-          classes: [],
-          keys: {}
-        }
-      }
-
-      if (this.task === 'regression') {
-        this.metadata[this.dataOn[0]].options = {min: 0, max: 0};
-      }
-
-      for (let i = 0; i < this.in; i++) {
-        this.metadata[this.dataIn[i]] = {min: 0, max: 0};
-      }
     } else {
       this.in = options.inputs;
       this.hn = options.hidden;
-      this.on = options.outputs;
+      this.dataOn = 'label';
     }
+    this.on = 0;
     this.learningRate = 0.6;
     this.model = this.createModel();
     this.trainData = [];
+    this.metadata = {
+      [this.dataOn]: {
+        classes: [],
+        keys: {}
+      }
+    }
+    for (let i = 0; i < this.in; i++) {
+      this.metadata[this.dataIn[i]] = {min: 0, max: 0};
+    }
+
+    if (this.task === 'regression') {
+      this.metadata[this.dataOn].options = {min: 0, max: 0};
+    }
   }
   
   createModel() {
@@ -87,9 +86,9 @@ class NeuralNetwork {
        //print(ys);
       if (this.dataIn && this.dataOn) {
         const outputs = [];
-        for (let i = 0; i < this.metadata[this.dataOn[0]].classes.length; i++) {
+        for (let i = 0; i < this.metadata[this.dataOn].classes.length; i++) {
           outputs.push({
-            label: this.metadata[this.dataOn[0]].classes[i],
+            label: this.metadata[this.dataOn].classes[i],
             confidence: ys[i]
           })
         }
@@ -116,13 +115,13 @@ class NeuralNetwork {
       const xs = tf.tensor2d([inputs]);
       const ys = await this.model.predict(xs).array();
       print(ys);
-      const { max, min } = this.metadata[this.dataOn[0]].options;
+      const { max, min } = this.metadata[this.dataOn].options;
       const unFormattedValue = ys[0][0];
       const val = map(unFormattedValue, 0, 1, min, max);
 
       return {
         value: val,
-        label: this.dataOn[0],
+        label: this.dataOn,
       }
     }
   }
@@ -150,13 +149,13 @@ class NeuralNetwork {
           }
 
           if (this.task === 'regression') {
-            const num = tar_arr[this.dataOn[0]];
+            const num = tar_arr[this.dataOn];
             if (this.dataAdded === 0) {
-              this.metadata[this.dataOn[0]].options.min = num;
-            } else if (num > this.metadata[this.dataOn[0]].options.max) {
-              this.metadata[this.dataOn[0]].options.max = num;
-            } else if (num < this.metadata[this.dataOn[0]].options.min) {
-              this.metadata[this.dataOn[0]].options.min = num;
+              this.metadata[this.dataOn].options.min = num;
+            } else if (num > this.metadata[this.dataOn].options.max) {
+              this.metadata[this.dataOn].options.max = num;
+            } else if (num < this.metadata[this.dataOn].options.min) {
+              this.metadata[this.dataOn].options.min = num;
             }
           }
 
@@ -168,25 +167,25 @@ class NeuralNetwork {
       }
 
       
-      if (this.metadata[this.dataOn[0]].classes.includes(tar_arr[this.dataOn[0]])) {
-        const index = this.metadata[this.dataOn[0]].classes.indexOf(tar_arr[this.dataOn[0]]);
-        this.metadata[this.dataOn[0]].keys[tar_arr[this.dataOn[0]]][index] = 1;
-        targets[this.dataOn[0]] =  tar_arr[this.dataOn[0]];
+      if (this.metadata[this.dataOn].classes.includes(tar_arr[this.dataOn])) {
+        const index = this.metadata[this.dataOn].classes.indexOf(tar_arr[this.dataOn]);
+        this.metadata[this.dataOn].keys[tar_arr[this.dataOn]][index] = 1;
+        targets[this.dataOn] =  tar_arr[this.dataOn];
       } else {
         this.on++;
-        this.metadata[this.dataOn[0]].classes.push(tar_arr[this.dataOn[0]]);
-        this.metadata[this.dataOn[0]].keys[tar_arr[this.dataOn[0]]] = [];
+        this.metadata[this.dataOn].classes.push(tar_arr[this.dataOn]);
+        this.metadata[this.dataOn].keys[tar_arr[this.dataOn]] = [];
         for (let i = 0; i < this.on-1; i++) {
-          this.metadata[this.dataOn[0]].keys[tar_arr[this.dataOn[0]]].push(0);
+          this.metadata[this.dataOn].keys[tar_arr[this.dataOn]].push(0);
         }
-        const keys = Object.keys(this.metadata[this.dataOn[0]].keys);
+        const keys = Object.keys(this.metadata[this.dataOn].keys);
         for (const name of keys) {
-          this.metadata[this.dataOn[0]].keys[name].push(0);
+          this.metadata[this.dataOn].keys[name].push(0);
         }
 
-        const index = this.metadata[this.dataOn[0]].classes.indexOf(tar_arr[this.dataOn[0]]);
-        this.metadata[this.dataOn[0]].keys[tar_arr[this.dataOn[0]]][index] = 1;
-        targets[this.dataOn[0]] = tar_arr[this.dataOn[0]];
+        const index = this.metadata[this.dataOn].classes.indexOf(tar_arr[this.dataOn]);
+        this.metadata[this.dataOn].keys[tar_arr[this.dataOn]][index] = 1;
+        targets[this.dataOn] = tar_arr[this.dataOn];
       }
 
       
@@ -215,7 +214,7 @@ class NeuralNetwork {
     const json = await response.json();
     this.trainData = json.data;
     this.metadata = json.meta;
-    for (let i = 0; i < this.metadata[this.dataOn[0]].classes.length; i++) {
+    for (let i = 0; i < this.metadata[this.dataOn].classes.length; i++) {
       this.on++;
     }
   }
@@ -238,7 +237,7 @@ class NeuralNetwork {
           inputs.push(data.inputs[this.dataIn[i]]);
         }
 
-        ys.push(this.metadata[this.dataOn[0]].keys[data.targets[this.dataOn[0]]]);      
+        ys.push(this.metadata[this.dataOn].keys[data.targets[this.dataOn]]);      
         xs.push(inputs);
       } else {
         xs.push(data.inputs);
