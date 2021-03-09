@@ -8,14 +8,17 @@ class NeuralNetwork {
       this.hn = options.hidden;
       this.dataIn = options.inputs;
       this.dataOn = options.outputs[0];
-      this.task = options.task;
-      this.dataAdded = 0;
+      this.format = 'named';
     } else {
       this.in = options.inputs;
       this.hn = options.hidden;
       this.dataOn = 'label';
+      this.dataIn = ['x0', 'x1'];
+      this.format = 'numbered';
     }
     this.on = 0;
+    this.task = options.task;
+    this.dataAdded = 0;
     this.learningRate = 0.6;
     this.model = this.createModel();
     this.trainData = [];
@@ -134,7 +137,7 @@ class NeuralNetwork {
     });
   }
   addData(in_arr, tar_arr) {
-    if (this.dataIn && this.dataOn) {
+    if (this.format = 'named') {
       const inputs = {};
       const targets = {};
       for (let i = 0; i < this.in; i++) {
@@ -163,7 +166,6 @@ class NeuralNetwork {
             item.max = in_arr[this.dataIn[i]]
           }
         }
-        this.dataAdded++;
       }
 
       
@@ -190,12 +192,75 @@ class NeuralNetwork {
 
       
       this.trainData.push({ inputs, targets });
-    } else {
+    } else if (this.format == 'numbered') {
+
+      const inputs = {};
+      const targets = {};
+
+      for (let i = 0; i < this.in; i++) {
+        //print(in_arr[this.dataIn[i]]);
+        if (this.metadata[this.dataIn[i]]) {
+          const item = this.metadata[this.dataIn[i]];
+          if (this.dataAdded === 0) {
+            item.min = in_arr[this.dataIn[i]];
+          } else if (item.min > in_arr[this.dataIn[i]]) {
+            item.min = in_arr[this.dataIn[i]];
+          }
+
+          if (this.task === 'regression') {
+            const num = tar_arr[this.dataOn];
+            if (this.dataAdded === 0) {
+              this.metadata[this.dataOn].options.min = num;
+            } else if (num > this.metadata[this.dataOn].options.max) {
+              this.metadata[this.dataOn].options.max = num;
+            } else if (num < this.metadata[this.dataOn].options.min) {
+              this.metadata[this.dataOn].options.min = num;
+            }
+          }
+
+          if (in_arr[this.dataIn[i]] > item.max) {
+            item.max = in_arr[this.dataIn[i]]
+          }
+        }
+      }
+
+      if (this.metadata[this.dataOn].classes.includes(tar_arr[this.dataOn])) {
+        const index = this.metadata[this.dataOn].classes.indexOf(tar_arr[this.dataOn]);
+        this.metadata[this.dataOn].keys[tar_arr[this.dataOn]][index] = 1;
+        targets[this.dataOn] =  tar_arr[this.dataOn];
+      } else {
+        this.on++;
+        this.metadata[this.dataOn].classes.push(tar_arr[this.dataOn]);
+        this.metadata[this.dataOn].keys[tar_arr[this.dataOn]] = [];
+        for (let i = 0; i < this.on-1; i++) {
+          this.metadata[this.dataOn].keys[tar_arr[this.dataOn]].push(0);
+        }
+        const keys = Object.keys(this.metadata[this.dataOn].keys);
+        for (const name of keys) {
+          this.metadata[this.dataOn].keys[name].push(0);
+        }
+
+        const index = this.metadata[this.dataOn].classes.indexOf(tar_arr[this.dataOn]);
+        this.metadata[this.dataOn].keys[tar_arr[this.dataOn]][index] = 1;
+        targets[this.dataOn] = tar_arr[this.dataOn];
+      }
+
+      Object.keys(in_arr).forEach((x, i) => {
+        if (this.dataIn.includes(`x${i}`)) {
+          inputs[`x${i}`] = in_arr[x];
+        }
+      });
+
+
+
+
+
       this.trainData.push({
-        inputs: in_arr,
-        targets: tar_arr
+        inputs,
+        targets
       })
     }
+    this.dataAdded++;
     this.model = this.createModel();
   }
 
