@@ -190,6 +190,7 @@ class NeuralNetwork {
         this.metadata[this.dataOn].keys[tar_arr[this.dataOn]][index] = 1;
         targets[this.dataOn] =  tar_arr[this.dataOn];
       } else {
+        this.on++;
         this.metadata[this.dataOn].classes.push(tar_arr[this.dataOn]);
         this.metadata[this.dataOn].keys[tar_arr[this.dataOn]] = [];
         for (let i = 0; i < this.on-1; i++) {
@@ -251,14 +252,9 @@ class NeuralNetwork {
         }
         this.metadata[this.dataOn].classes.push(tar_arr[this.dataOn]);
         this.metadata[this.dataOn].keys[tar_arr[this.dataOn]] = [];
-        for (let i = 0; i < this.on-1; i++) {
+        for (let i = 0; i < this.on; i++) {
           this.metadata[this.dataOn].keys[tar_arr[this.dataOn]].push(0);
         }
-        const keys = Object.keys(this.metadata[this.dataOn].keys);
-        for (const name of keys) {
-          this.metadata[this.dataOn].keys[name].push(0);
-        }
-
         const index = this.metadata[this.dataOn].classes.indexOf(tar_arr[this.dataOn]);
         this.metadata[this.dataOn].keys[tar_arr[this.dataOn]][index] = 1;
         targets[this.dataOn] = tar_arr[this.dataOn];
