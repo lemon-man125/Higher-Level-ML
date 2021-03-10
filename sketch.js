@@ -12,7 +12,7 @@ function setup() {
 
   const options = {
     inputs: 2,
-    outputs: 3,
+    outputs: 2,
     hidden: 16,
     task: 'classification'
   }

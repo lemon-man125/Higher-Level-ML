@@ -13,7 +13,10 @@ class NeuralNetwork {
       this.in = options.inputs;
       this.hn = options.hidden;
       this.dataOn = 'label';
-      this.dataIn = ['x0', 'x1'];
+      this.dataIn = [];
+      for (let i = 0; i < this.in; i++) {
+        this.dataIn.push(`x${i}`);
+      }
       this.format = 'numbered';
     }
     this.on = 0;
@@ -79,7 +82,12 @@ class NeuralNetwork {
         for (let i = 0; i < this.dataIn.length; i++) {
           let normalized;
           if (this.metadata[this.dataIn[i]]) {
-            normalized = map(in_arr[this.dataIn[i]], this.metadata[this.dataIn[i]].min, this.metadata[this.dataIn[i]].max, 0, 1);
+            if (this.format === 'named') {
+              normalized = map(in_arr[this.dataIn[i]], this.metadata[this.dataIn[i]].min, this.metadata[this.dataIn[i]].max, 0, 1);
+            } else if (this.format === 'numbered') {
+              const label = Object.keys(in_arr)[i];
+              normalized = map(in_arr[label], this.metadata[this.dataIn[i]].min, this.metadata[this.dataIn[i]].max, 0, 1);
+            }
           }
           inputs.push(normalized); 
         }
@@ -137,7 +145,14 @@ class NeuralNetwork {
     });
   }
   addData(in_arr, tar_arr) {
-    if (this.format = 'named') {
+    if (Object.keys(tar_arr)[0] !== this.dataOn) {
+      throw new Error('Your labeled target does not equal the labeled target set by you.');
+    }
+    
+    if (Object.keys(in_arr).length !== this.in) {
+      throw new Error('The amount of inputs you sent in do not match to the amount of inputs set in start.');
+    } 
+    if (this.format == 'named') {
       const inputs = {};
       const targets = {};
       for (let i = 0; i < this.in; i++) {
@@ -197,14 +212,16 @@ class NeuralNetwork {
       const inputs = {};
       const targets = {};
 
+
       for (let i = 0; i < this.in; i++) {
         //print(in_arr[this.dataIn[i]]);
+        const label = Object.keys(in_arr)[i];
         if (this.metadata[this.dataIn[i]]) {
           const item = this.metadata[this.dataIn[i]];
           if (this.dataAdded === 0) {
-            item.min = in_arr[this.dataIn[i]];
-          } else if (item.min > in_arr[this.dataIn[i]]) {
-            item.min = in_arr[this.dataIn[i]];
+            item.min = in_arr[label];
+          } else if (item.min > in_arr[label]) {
+            item.min = in_arr[label];
           }
 
           if (this.task === 'regression') {
@@ -218,8 +235,8 @@ class NeuralNetwork {
             }
           }
 
-          if (in_arr[this.dataIn[i]] > item.max) {
-            item.max = in_arr[this.dataIn[i]]
+          if (in_arr[label] > item.max) {
+            item.max = in_arr[label]
           }
         }
       }
@@ -227,7 +244,7 @@ class NeuralNetwork {
       if (this.metadata[this.dataOn].classes.includes(tar_arr[this.dataOn])) {
         const index = this.metadata[this.dataOn].classes.indexOf(tar_arr[this.dataOn]);
         this.metadata[this.dataOn].keys[tar_arr[this.dataOn]][index] = 1;
-        targets[this.dataOn] =  tar_arr[this.dataOn];
+        targets[this.dataOn] = tar_arr[this.dataOn];
       } else {
         this.on++;
         this.metadata[this.dataOn].classes.push(tar_arr[this.dataOn]);
