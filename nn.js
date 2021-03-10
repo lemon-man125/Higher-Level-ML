@@ -294,8 +294,10 @@ class NeuralNetwork {
     const json = await response.json();
     this.trainData = json.data;
     this.metadata = json.meta;
-    for (let i = 0; i < this.metadata[this.dataOn].classes.length; i++) {
-      this.on++;
+    if (this.format === 'named') {
+      for (let i = 0; i < this.metadata[this.dataOn].classes.length; i++) {
+        this.on++;
+      }
     }
   }
   
