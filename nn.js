@@ -8,10 +8,12 @@ class NeuralNetwork {
       this.hn = options.hidden;
       this.dataIn = options.inputs;
       this.dataOn = options.outputs[0];
+      this.on = 0;
       this.format = 'named';
     } else {
       this.in = options.inputs;
       this.hn = options.hidden;
+      this.on = options.outputs;
       this.dataOn = 'label';
       this.dataIn = [];
       for (let i = 0; i < this.in; i++) {
@@ -19,7 +21,6 @@ class NeuralNetwork {
       }
       this.format = 'numbered';
     }
-    this.on = 0;
     this.task = options.task;
     this.dataAdded = 0;
     this.learningRate = 0.6;
@@ -189,7 +190,9 @@ class NeuralNetwork {
         this.metadata[this.dataOn].keys[tar_arr[this.dataOn]][index] = 1;
         targets[this.dataOn] =  tar_arr[this.dataOn];
       } else {
-        this.on++;
+        if (this.metadata[this.dataOn].classes.length === this.on) {
+          throw new Error('You have provided more outputs than specified in your nn cofigurations.');        
+        }
         this.metadata[this.dataOn].classes.push(tar_arr[this.dataOn]);
         this.metadata[this.dataOn].keys[tar_arr[this.dataOn]] = [];
         for (let i = 0; i < this.on-1; i++) {
