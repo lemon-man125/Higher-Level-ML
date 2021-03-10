@@ -190,9 +190,6 @@ class NeuralNetwork {
         this.metadata[this.dataOn].keys[tar_arr[this.dataOn]][index] = 1;
         targets[this.dataOn] =  tar_arr[this.dataOn];
       } else {
-        if (this.metadata[this.dataOn].classes.length === this.on) {
-          throw new Error('You have provided more outputs than specified in your nn cofigurations.');        
-        }
         this.metadata[this.dataOn].classes.push(tar_arr[this.dataOn]);
         this.metadata[this.dataOn].keys[tar_arr[this.dataOn]] = [];
         for (let i = 0; i < this.on-1; i++) {
@@ -249,7 +246,9 @@ class NeuralNetwork {
         this.metadata[this.dataOn].keys[tar_arr[this.dataOn]][index] = 1;
         targets[this.dataOn] = tar_arr[this.dataOn];
       } else {
-        this.on++;
+        if (this.metadata[this.dataOn].classes.length === this.on) {
+          throw new Error('You have provided more outputs than specified in your nn cofigurations.');        
+        }
         this.metadata[this.dataOn].classes.push(tar_arr[this.dataOn]);
         this.metadata[this.dataOn].keys[tar_arr[this.dataOn]] = [];
         for (let i = 0; i < this.on-1; i++) {
