@@ -422,21 +422,17 @@ class NeuralNetwork {
   async loadData(data) {
     const response = await fetch(data);
     const json = await response.json();
-    this.trainData = json.data;
-    this.metadata = json.meta;
-    if (this.format === 'named') {
-      for (let i = 0; i < this.metadata[this.dataOn].classes.length; i++) {
-        this.on++;
-      }
-    }
+    json.data.forEach((x, i) => {
+      const { inputs, targets } = x;
+      this.addData(inputs, targets);
+    })
   }
   
-  saveData() {
+  saveData(fileName = 'model-data') {
     const trainData = {
       data: this.trainData,
-      meta: this.metadata,
     }
-    saveJSON(trainData, 'model-data');
+    saveJSON(trainData, fileName);
   }
   
   async train(options, call) {
