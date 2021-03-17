@@ -71,7 +71,7 @@ class NeuralNetwork {
     this.hn = options.hidden ? options.hidden : 64;
     this.task = options.task;
     this.dataAdded = 0;
-    this.learningRate = 0.6;
+    this.learningRate = 0.1;
 
 
     if (this.task === 'imageClassification') {
@@ -145,26 +145,27 @@ class NeuralNetwork {
         filters: 8,
         inputShape: [this.imageWidth, this.imageHeight, this.imageChannels],
         kernelSize: 5,
-        padding: 'same',
+        kernelInitializer: 'varianceScaling',
         activation: 'relu',
       }));
       model.add(tf.layers.maxPooling2d({
-        poolSize: 2,
-        strides: 2
+        poolSize: [2, 2],
+        strides: [2, 2],
       }))
       model.add(tf.layers.conv2d({
         filters: 16,
         kernelSize: 5,
-        padding: 'same',
+        kernelInitializer: 'varianceScaling',
         activation: 'relu',
       }));
       model.add(tf.layers.maxPooling2d({
-        poolSize: 3,
-        strides: 3
+        poolSize: [2, 2],
+        strides: [2, 2],
       }))
       model.add(tf.layers.flatten());
       model.add(tf.layers.dense({
         units: this.on > 0 ? this.on : 1,
+        kernelInitializer: 'varianceScaling',
         activation: 'softmax'
       }));
       
@@ -180,20 +181,27 @@ class NeuralNetwork {
   query(in_arr) {
     return tf.tidy(() => {
       let inputs = [];
-      for (let i = 0; i < this.dataIn.length; i++) {
-        let normalized;
-        if (this.metadata[this.dataIn[i]]) {
-          if (this.format === 'named') {
-            normalized = map(in_arr[this.dataIn[i]], this.metadata[this.dataIn[i]].min, this.metadata[this.dataIn[i]].max, 0, 1);
-          } else if (this.format === 'numbered') {
-            const label = Object.keys(in_arr)[i];
-            normalized = map(in_arr[label], this.metadata[this.dataIn[i]].min, this.metadata[this.dataIn[i]].max, 0, 1);
+      if (this.task !== 'imageClassification') {
+        for (let i = 0; i < this.dataIn.length; i++) {
+          let normalized;
+          if (this.metadata[this.dataIn[i]]) {
+            if (this.format === 'named') {
+              normalized = map(in_arr[this.dataIn[i]], this.metadata[this.dataIn[i]].min, this.metadata[this.dataIn[i]].max, 0, 1);
+            } else if (this.format === 'numbered') {
+              const label = Object.keys(in_arr)[i];
+              normalized = map(in_arr[label], this.metadata[this.dataIn[i]].min, this.metadata[this.dataIn[i]].max, 0, 1);
+            }
           }
+          inputs.push(normalized); 
         }
-        inputs.push(normalized); 
+      } else {
+        const pixels = imgToPixelArray(in_arr.image);
+        inputs = pixels.map(val => map(val, 0, 255, 0, 1));
       }
 
-      const xs = tf.tensor2d([inputs]);
+      const xs = this.task === 'imageClassification' ? tf.tensor(inputs, [this.imageWidth, this.imageHeight, this.imageChannels]).expandDims() : tf.tensor2d([inputs]);
+      // xs.print();
+      // console.log(xs.shape);
       const ys = this.model.predict(xs).dataSync();
        //print(ys);
       if (this.dataIn && this.dataOn) {
@@ -413,7 +421,11 @@ class NeuralNetwork {
     for (const data of this.trainData) {
       if (this.dataOn && this.dataIn) {
         for (let i = 0; i < this.dataIn.length; i++) {
-          data.inputs[this.dataIn[i]] = map(data.inputs[this.dataIn[i]], this.metadata[this.dataIn[i]].min, this.metadata[this.dataIn[i]].max, 0, 1);
+          if (this.task !== 'imageClassification') {
+            data.inputs[this.dataIn[i]] = map(data.inputs[this.dataIn[i]], this.metadata[this.dataIn[i]].min, this.metadata[this.dataIn[i]].max, 0, 1);
+          } else {
+            data.inputs[this.dataIn[i]] = data.inputs[this.dataIn[i]].map(val => map(val, 0, 255, 0, 1));
+          }
         }
       }
     }
@@ -442,12 +454,17 @@ class NeuralNetwork {
       if (this.dataIn && this.dataOn) {
         const inputs = [];
         for (let i = 0; i < this.dataIn.length; i++) {
-          
-          inputs.push(data.inputs[this.dataIn[i]]);
+          if (this.task !== 'imageClassification') {
+            inputs.push(data.inputs[this.dataIn[i]]);
+          } else {
+            xs.push(data.inputs[this.dataIn[i]]);
+          }
         }
 
-        ys.push(this.metadata[this.dataOn].keys[data.targets[this.dataOn]]);      
-        xs.push(inputs);
+        ys.push(this.metadata[this.dataOn].keys[data.targets[this.dataOn]]);
+        if (this.task !== 'imageClassification') {      
+          xs.push(inputs);
+        }
       } else {
         xs.push(data.inputs);
         ys.push(data.targets);
@@ -462,8 +479,7 @@ class NeuralNetwork {
       xs = tf.tensor2d(xs);
       ys = tf.tensor2d(ys);
     } else {
-      console.log(xs);
-      xs = tf.tensor2d(xs);
+      xs = tf.tensor(xs, [xs.length, this.imageWidth, this.imageHeight, this.imageChannels]);
       ys = tf.tensor2d(ys);
     }
     
