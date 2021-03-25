@@ -21,12 +21,16 @@
         <h5 class="desc">Pick your label to add data with!</h5>
       </div>
 
-      <input list='classlist' type="text" id='classSelector'>
-      <datalist id='classlist'>
-        <option value="There">
-        <option value="Not There">
-      </datalist>
-      <button class='addData'>Add Data</button>
+
+      <div class="input-wrapper">
+        <input list='classlist' type="text" id='classSelector'>
+        <datalist id='classlist'>
+          <option value="There">
+          <option value="Not There">
+        </datalist>
+        <input type="number" id="numSelector" min=25 max=250>
+        <button class='addData'>Add Data</button>
+      </div>
     </div>
     <script src="sketch.js"></script>
     <script src="nn.js"></script>
