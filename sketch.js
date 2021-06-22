@@ -85,6 +85,7 @@ function classifyVideo() {
 }
 
 async function addExample(label, dataAmount) {
+  const fps = frameRate();
   for (let i = 0; i < dataAmount; i++) {
     if (counters[label]) {
       if (counters[label] >= dataAmount) return;
@@ -96,7 +97,7 @@ async function addExample(label, dataAmount) {
     const target = { label };
     console.log(`adding ${target.label}`);
     brain.addData(inputs, target);
-    await delay(0.07);
+    await delay(dataAmount / fps / dataAmount);
   }
 }
 
