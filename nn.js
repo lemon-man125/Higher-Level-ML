@@ -383,6 +383,8 @@ class NeuralNetwork {
         "Your labeled target does not equal the labeled target set by you."
       );
     }
+    
+    if (this.format == "named" && in_arr instanceof Array) throw new Error("You are using the labeled format, therefore your inputs have to be in an object");
 
     if (
       !(in_arr instanceof Uint8Array) &&
