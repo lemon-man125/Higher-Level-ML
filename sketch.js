@@ -12,11 +12,20 @@ const counters = {};
 
 let canvas;
 
+let col;
+let targetCol;
+
+let previousCol = null;
+
 function setup() {
   canvas = createCanvas(400, 400);
   video = createCapture(VIDEO);
   video.size(64, 64);
   video.hide();
+
+  col = color(255);
+  randomSeed(random(1000));
+  targetCol = color(random(255), random(255), random(255));
 
   addDataButton = select(".addData");
   addDataButton.mousePressed(() => {
@@ -25,7 +34,7 @@ function setup() {
     addExample(data, num);
   });
 
-  trainButton = createButton("Train");
+  trainButton = select(".train");
   trainButton.mousePressed(train);
 
   // const labels = ['Chris', 'Bed'];
@@ -135,4 +144,36 @@ function draw() {
     textAlign(CENTER, CENTER);
     text(classLabel, width / 2, height / 2);
   }
+
+  // console.log(
+  //   red(col),
+  //   green(col),
+  //   blue(col),
+  //   red(targetCol),
+  //   green(targetCol),
+  //   blue(targetCol)
+  // );
+  previousCol = col;
+  col = lerpColor(col, targetCol, 0.005);
+
+  document.body.style["background-color"] = `rgb(${red(col)}, ${green(
+    col
+  )}, ${blue(col)})`;
+
+  // console.log(
+  //   red(col) == red(previousCol) &&
+  //     green(col) == green(previousCol) &&
+  //     blue(col) == blue(previousCol)
+  // );
+
+  if (
+    red(col) != red(previousCol) ||
+    green(col) != green(previousCol) ||
+    blue(col) != blue(previousCol)
+  )
+    return;
+
+  randomSeed(random(5000));
+
+  targetCol = color(random(255), random(255), random(255));
 }

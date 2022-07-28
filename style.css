@@ -1,16 +1,31 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap");
 
+:root {
+  --width: 75vw;
+  --height: 25rem;
+}
+
 html,
 body {
   display: flex;
+  flex-direction: column-reverse;
   align-items: center;
-  justify-content: space-around;
+  justify-content: space-evenly;
   margin: 0;
   padding: 0;
+  min-height: 100vh;
+  min-width: 100vw;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.5) 0%,
+    rgba(0, 0, 0, 0) 100%
+  );
 }
 
-canvas {
+.p5Canvas {
   display: block;
+  border-radius: 2rem;
+  box-shadow: 0 0 10px black;
 }
 
 /* #classSelector {
@@ -22,15 +37,14 @@ canvas {
   align-items: center;
   justify-content: space-evenly;
   flex-direction: column;
-  margin-right: 5rem;
   background-color: #c3c3c3;
-  width: 15rem;
-  height: 10rem;
+  width: var(--width);
+  height: var(--height);
   box-shadow: 0 0 10px black;
 }
 
-.addData {
-  width: 7rem;
+.buttons button {
+  width: calc((var(--width)) / 3 - 10rem);
   height: 2.5rem;
   background-color: #0e53a2;
   color: white;
@@ -38,8 +52,19 @@ canvas {
   font-family: Poppins;
   font-size: 1rem;
   font-weight: 500;
-  transition: all 75ms ease-in-out;
+  transition: background-color, width 75ms ease-in-out;
   box-shadow: 0 0 20px -2px black;
+}
+.buttons button:hover {
+  cursor: pointer;
+  background-color: purple;
+  width: 20vw;
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-evenly;
+  width: var(--width);
 }
 
 .wrapper {
@@ -52,22 +77,23 @@ canvas {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-around;
+  width: var(--width);
+  height: 15rem;
 }
 
-#numSelector {
+#numSelector,
+#classSelector {
   display: block;
-  width: 2.5rem;
-}
-
-.addData:hover {
-  cursor: pointer;
-  background-color: purple;
+  text-align: center;
+  font-family: Poppins;
+  font-size: 16pt;
+  width: calc(var(--width) - 10rem);
 }
 
 .label-header {
   font-family: Poppins;
-  font-size: 16pt;
+  font-size: 48pt;
   margin: 0;
   padding: 0;
 }
@@ -75,4 +101,5 @@ canvas {
   font-family: Poppins;
   margin: 0;
   padding: 0;
+  font-size: 12pt;
 }

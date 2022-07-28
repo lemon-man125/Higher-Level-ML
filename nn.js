@@ -57,7 +57,7 @@ class NeuralNetwork {
     if (options.inputs instanceof Array) {
       this.in = options.inputs.length;
       this.dataIn = options.inputs;
-      this.dataOn = options.outputs ? options.outputs[0] : "label";
+      this.dataOn = "outputs" in options ? options.outputs[0] : "label";
       this.on = 0;
       this.format = "named";
     } else {
@@ -75,6 +75,7 @@ class NeuralNetwork {
     this.task = options.task;
     this.dataAdded = 0;
     this.learningRate = options.learningRate ? options.learningRate : 0.02;
+    this.isNormalized = false;
 
     if (this.task === "imageClassification") {
       this.in = 1;
@@ -266,6 +267,7 @@ class NeuralNetwork {
         throw "The url you provided is not a proper tensorflow model!";
       }
       this.baseModelURL = modelUrl;
+      return;
     }
   }
 
@@ -368,6 +370,14 @@ class NeuralNetwork {
         };
       }
     });
+  }
+
+  async save(modelName = "model", callback) {
+    const modelMeta = {
+      inputNum: this.in,
+      outputNum: this.on,
+      metadata: this.metadata,
+    };
   }
 
   query2d(in_arr) {
@@ -507,8 +517,8 @@ class NeuralNetwork {
           const item = this.metadata[this.dataIn[i]];
           if (this.dataAdded === 0) {
             item.min = in_arr[label];
-          } else if (item.min > in_arr[label]) {
-            item.min = in_arr[label];
+          } else {
+            item.min = Math.min(item.min, in_arr[label]);
           }
 
           if (this.task === "regression") {
@@ -580,9 +590,9 @@ class NeuralNetwork {
               1
             );
           } else {
-            data.inputs[this.dataIn[i]] = data.inputs[
-              this.dataIn[i]
-            ].map((val) => map(val, 0, 255, 0, 1));
+            data.inputs[this.dataIn[i]] = data.inputs[this.dataIn[i]].map(
+              (val) => map(val, 0, 255, 0, 1)
+            );
           }
         }
         if (this.task == "regression") {
@@ -675,6 +685,8 @@ class NeuralNetwork {
 
     xs.dispose();
     ys.dispose();
+
+    if (call) call();
     return result;
   }
 }

@@ -2,11 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Sketch</title>
 
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="style.css" />
 
     <script src="libraries/p5.min.js"></script>
     <script src="libraries/p5.sound.min.js"></script>
@@ -21,15 +21,19 @@
         <h5 class="desc">Pick your label to add data with!</h5>
       </div>
 
-
       <div class="input-wrapper">
-        <input list='classlist' type="text" id='classSelector'>
-        <datalist id='classlist'>
-          <option value="There">
-          <option value="Not There">
+        <input list="classlist" type="text" id="classSelector" value="There" />
+        <datalist id="classlist">
+          <option value="There"></option>
+          <option value="Not There"></option>
         </datalist>
-        <input type="number" id="numSelector" min=25 max=250>
-        <button class='addData'>Add Data</button>
+
+        <input type="number" id="numSelector" min="25" max="250" value="100" />
+        <div class="buttons">
+          <button class="addData">Add Data</button>
+          <button class="save">Save Model</button>
+          <button class="train">Train</button>
+        </div>
       </div>
     </div>
     <script src="sketch.js"></script>
